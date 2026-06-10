@@ -1,0 +1,6 @@
+# 微博登录凭证，仅本地使用
+cookies.txt
+
+# Python 缓存
+__pycache__/
+*.pyc

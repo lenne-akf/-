@@ -1,0 +1,6 @@
+Cookie
+!Cookie.example
+cookies.txt
+cookies_*
+playwright-state/
+__pycache__/

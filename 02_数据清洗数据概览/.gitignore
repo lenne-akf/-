@@ -1,0 +1,11 @@
+Cookie
+cookies.txt
+cookies_weibo
+*.jsonl
+__pycache__/
+.venv/
+playwright-state/
+*.log
+~$*.pptx
+~$*.xlsx
+.DS_Store

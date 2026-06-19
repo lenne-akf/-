@@ -1,26 +1,37 @@
 # 话语标签
 
-人身攻击话语的**标签化规则**与 **page14 可视化**（条形图 + 桑基 + 典型评论）。
+人身攻击话语的**标签化规则**、**五类修辞体系**与可视化。
+
+## 概念口径
+
+| 层级 | 名称 | 说明 |
+|------|------|------|
+| 总概念 | **话语标签** | 23 种可复现话术（正文正则匹配） |
+| **梗式合理化** | 6 种子标签 | 借**本事件 meme** 包装，表面像玩梗/谈作品 |
+| 论事框架化 | 4 种 | 抄袭、洗白、又当又立、明知故犯 |
+| 其他 | 动机归因 / 直接扣帽 / 能力贬损 | 非梗式路径 |
+
+### 梗式合理化（6 种 · 本事件特有）
+
+| 标签 | 典型表达 | 为什么算「梗式」 |
+|------|----------|----------------|
+| **又如何呢** | 如何呢又能怎、又能怎 | 复读改编歌词 |
+| **亮甲梗** | 亮甲、灰指甲、一个传染俩 | 李白旋律 × 亮甲广告混梗 |
+| **打野梗** | 我本是辅助、今晚来打野、区区三万天 | 改编插入句本身成 meme |
+| **时尚单品** | 把「如何呢又能怎」当时尚单品 | 元话语：把梗时尚化 |
+| **mean梗** | mean girl、mean0、牙尖 mean | 借英文网梗指代粉丝文化 |
+| **体面反讽** | 体面干嘛侵权、强行侵权还体面 | 反讽式复读维权话术 |
 
 ## 脚本
-
-| 文件 | 说明 |
-|------|------|
-| `discourse_label_features.py` | 18 类标签正则、攻击维度、`lbl_*` 特征（Logistic 复用） |
-| `plot_page14_discourse_labeling.py` | 产出 `output/page14_discourse_labeling.png` |
-
-## 运行
 
 ```powershell
 cd 概览分析/话语标签
 python plot_page14_discourse_labeling.py
+python plot_discourse_rhetoric_extension.py
 ```
-
-前置：v5 池 user_id 列表、`output/comments_with_topics.csv`（见 `数据清洗与数据概览` 流水线）。
 
 ## 产出
 
-- `../output/page14_discourse_labeling.png`
-- `../output/page14_label_frequencies.csv`
-- `../output/page14_label_sankey_links.csv`
-- `../output/page14_label_example.csv`
+- `../output/page14_discourse_labeling.png`（运行后同步至 `粉籍分析/output/`，PPT 用此路径亦可）
+- `../output/page14_rhetoric_extension.png`
+- `../output/page14_rhetoric_class_summary.csv`

@@ -4,7 +4,7 @@ from __future__ import annotations
 699 粉籍子样本 · 嵌套 Logistic（粉籍 / 立场 / 标签 ΔAUC）
 
 主体层：粉籍（单依纯 / 李荣浩 / 跨界）+ 立场光谱（道德审判 / 版权原教旨 / 乐子人；参照：路人/和事佬）
-话语层：18 类话语标签（lbl_*）
+话语层：23 种话语标签（lbl_*，与 discourse_label_features 同源）
 
 因变量：话语异化 topic 4∪5（人身攻击 + 议题化人设贬损；与扶梯锚点 topic 4 相关但非同一定义）
 
@@ -20,10 +20,11 @@ from __future__ import annotations
 import sys
 from pathlib import Path as _Path
 sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
-from _paths import OUT, DATA, OVERVIEW, COMMENTS_TOPICS, SENTIMENT, V5_USER_IDS, FENJI_CSV, bootstrap_sys_path
+from _paths import OUT, DATA, OVERVIEW, COMMENTS_TOPICS, SENTIMENT, V5_USER_IDS, FENJI_CSV, FENJI_OUTPUT, bootstrap_sys_path
 bootstrap_sys_path()
 
 
+import shutil
 import sys
 from pathlib import Path
 
@@ -63,7 +64,7 @@ VIZ_W, VIZ_H = 1920, 1050
 FENJI_SUBJECT_COLS = FENJI_COLS
 STANCE_COLS = stance_feature_cols()
 SUBJECT_COLS = FENJI_SUBJECT_COLS + STANCE_COLS
-LABEL_NAMES = [n for n, _, _ in DISCOURSE_LABELS]
+LABEL_NAMES = [n for n, _, _, _ in DISCOURSE_LABELS]
 LABEL_COLS = [label_col(n) for n in LABEL_NAMES]
 FEAT_COLS = SUBJECT_COLS + LABEL_COLS
 
@@ -83,11 +84,31 @@ FEATURE_META: dict[str, tuple[str, str]] = {
 }
 
 
+FRAME_CACHE_CANDIDATES = [
+    FENJI_OUTPUT / "page_fenji_699_three_layer_frame.csv",
+    OUT / "page_fenji_699_three_layer_frame.csv",
+]
+
+
+def _prepare_frame_from_cache(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path, dtype={"comment_id": str})
+    lbl_drop = [c for c in df.columns if c.startswith("lbl_")]
+    df = df.drop(columns=lbl_drop, errors="ignore")
+    return add_label_columns(df, names=LABEL_NAMES)
+
+
 def prepare_frame() -> pd.DataFrame:
-    df = analysis_frame()
-    df = add_stance_columns(df)
-    df = add_label_columns(df, names=LABEL_NAMES)
-    return df
+    if FENJI_CSV.exists():
+        df = analysis_frame()
+        df = add_stance_columns(df)
+        return add_label_columns(df, names=LABEL_NAMES)
+    for cache in FRAME_CACHE_CANDIDATES:
+        if cache.exists():
+            print(f"[cache] 粉籍表缺失，从缓存帧重建 23 种标签特征: {cache}")
+            return _prepare_frame_from_cache(cache)
+    raise FileNotFoundError(
+        f"缺少粉籍表 {FENJI_CSV}，且无缓存帧 {FRAME_CACHE_CANDIDATES[0]}"
+    )
 
 
 def _fit_auc(df: pd.DataFrame, cols: list[str]) -> tuple[LogisticRegression, float]:
@@ -211,7 +232,7 @@ def build_convergence_panel(fig, nested: pd.DataFrame, tier_df: pd.DataFrame) ->
         ),
         (
             "标签",
-            "18 类话语标签",
+            f"{len(LABEL_NAMES)} 种话语标签",
             0.76,
             TIER_COLORS["标签"],
             delta_map.get("话语层·标签", 0),
@@ -454,7 +475,23 @@ def main() -> None:
     png = OUT / "page_fenji_699_three_layer_logistic.png"
     fig.write_image(str(png), width=VIZ_W, height=VIZ_H, scale=3)
 
+    FENJI_OUTPUT.mkdir(parents=True, exist_ok=True)
+    sync_names = [
+        "page_fenji_699_three_layer_logistic.png",
+        "page_fenji_699_three_layer_coefficients.csv",
+        "page_fenji_699_three_tier_summary.csv",
+        "page_fenji_699_three_layer_layer_summary.csv",
+        "page_fenji_699_three_layer_nested.csv",
+        "page_fenji_699_stance_distribution.csv",
+        "page_fenji_699_three_layer_frame.csv",
+    ]
+    for name in sync_names:
+        src = OUT / name
+        if src.exists():
+            shutil.copy2(src, FENJI_OUTPUT / name)
+
     print(f"[output] {png}")
+    print(f"[sync]   {FENJI_OUTPUT}")
     print(f"n={len(df)} · 异化={n_pos} · AUC={auc:.4f}")
     print("\n立场光谱分布:\n", stance_dist.to_string(index=False))
     print("\n|β| 权重（粉籍/立场/标签）:\n", tier_df.to_string(index=False))

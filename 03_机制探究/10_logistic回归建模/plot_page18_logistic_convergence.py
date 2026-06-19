@@ -15,11 +15,17 @@ from _paths import COMMENTS_TOPICS, FENJI_CSV, bootstrap_sys_path
 from event_phases import OUTBREAK_END, OUTBREAK_START
 
 bootstrap_sys_path()
-from build_topic_escalator import ATTACK_LEXICON  # noqa: E402
+
+# 与 escalator 分析同源的攻击词表（build_topic_escalator 已移除，Logistic 特征仍依赖此表）
+ATTACK_LEXICON = (
+    "人身攻击", "网暴", "辱骂", "去死", "滚", "贱", "丑", "恶心", "垃圾", "不要脸",
+    "死", "骂", "撕", "贱人", "婊", "废物", "狗", "支持维权", "墙倒", "没教养",
+    "人品", "白眼", "拽", "mean",
+)
 
 FONT = "Microsoft YaHei, SimHei, PingFang SC, sans-serif"
 VIZ_W = 1920
-LAYER_COLORS = {"结构层": "#5c4a1e", "主体层": "#A67C52", "话语层": "#B03A3A"}
+LAYER_COLORS = {"结构层": "#5c4a1e", "主体层": "#A67C52", "话语层": "#B03A3A", "结果层": "#2C3E50"}
 
 FENJI_COLS = ["fenji_shan", "fenji_li", "cross_fenji"]
 DISCOURSE_COLS = ["neg_emotion", "is_template", "attack_lexicon", "log_text_len"]
